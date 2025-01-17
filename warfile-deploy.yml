@@ -6,7 +6,7 @@
     - vars.yml
   vars:
     tomcat_webapps_dir: /var/lib/tomcat9/webapps/
-    war_file_name: my_web_app.war
+    war_file_name: my-web-app-1.0.0.war  # Updated to match actual WAR file name
     war_source_dir: "/home/aanza/state-job-warfile/my_web_app"
     maven_path: "/usr/bin/mvn"
 
