@@ -1,0 +1,39 @@
+---
+- name: Build and Deploy WAR file to Tomcat server
+  hosts: "{{ hostname }}"
+  become: yes
+  vars_files:
+    - vars.yml
+  vars:
+    tomcat_webapps_dir: /var/lib/tomcat9/webapps/
+    war_file_name: my_web_app.war
+    war_source_dir: "/home/aanza/state-job-warfile/my_web_app"
+    maven_path: "/usr/bin/mvn"
+
+  tasks:
+    - name: Ensure Tomcat webapps directory exists
+      file:
+        path: "{{ tomcat_webapps_dir }}"
+        state: directory
+
+    - name: Build WAR file using Maven
+      command:
+        cmd: "{{ maven_path }} clean package"
+        chdir: "{{ war_source_dir }}"
+      register: maven_build
+      failed_when: maven_build.rc != 0
+      notify: Restart Tomcat
+
+    - name: Copy the WAR file to Tomcat webapps directory
+      copy:
+        src: "{{ war_source_dir }}/target/{{ war_file_name }}"
+        dest: "{{ tomcat_webapps_dir }}"
+        owner: tomcat
+        group: tomcat
+        mode: '0644'
+
+  handlers:
+    - name: Restart Tomcat
+      service:
+        name: tomcat9
+        state: restarted
